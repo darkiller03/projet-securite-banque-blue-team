@@ -17,10 +17,10 @@
 
 | Membre | Rôle principal | Rôle de relecture |
 |---|---|---|
-| [Nom 1] | Range / infra (Ludus, OPNsense) | Supervision |
-| [Nom 2] | Supervision / détection | Scénario |
-| [Nom 3] | Scénario / OpenAEV, tests atomiques | Recherche |
-| [Nom 4] | Recherche / animation / documentation | Range |
+| m1 | Range / infra (Ludus, OPNsense) | Supervision |
+| M2 | Supervision / détection | Scénario |
+| M3 | Scénario / OpenAEV, tests atomiques | Recherche |
+| M4 | Recherche / animation / documentation | Range |
 
 ## 3. Choix techniques
 
