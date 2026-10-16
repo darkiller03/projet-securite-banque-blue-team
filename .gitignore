@@ -18,6 +18,8 @@ vault-pass*
 .vault_pass
 credentials*
 *.kdbx
+*:Zone.Identifier
+*Zone.Identifier
 
 # --- Variables locales Ludus / Ansible ---
 ludus/*.local.yml
