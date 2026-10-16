@@ -1,0 +1,58 @@
+# --- Secrets et identifiants ---
+.env
+.env.*
+*.env
+secrets/
+*.secret
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+*.ovpn
+wg*.conf
+*wireguard*.conf
+*privatekey*
+vault-pass*
+.vault_pass
+credentials*
+*.kdbx
+
+# --- Variables locales Ludus / Ansible ---
+ludus/*.local.yml
+ludus/*-secrets.yml
+*.retry
+.ansible/
+
+# --- Exports bruts non nettoyés (à nettoyer avant de les placer dans openaev/) ---
+openaev/raw/
+openaev/*-raw.json
+*.dump
+*.sql
+
+# --- Sauvegardes, images disque, captures volumineuses ---
+*.qcow2
+*.vma
+*.vma.zst
+*.ova
+*.iso
+*.pcap
+*.pcapng
+*.zip
+*.7z
+*.tar.gz
+
+# --- Éditeurs, OS, Python ---
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+
+# --- À ne pas ignorer ---
+!.gitkeep
