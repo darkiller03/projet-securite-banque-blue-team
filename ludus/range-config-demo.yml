@@ -1,0 +1,53 @@
+# Mini-infra de démo (séance du 13/11) :
+# 1 serveur Mattermost (VLAN 20) + 2 clients Linux (VLAN 30).
+# Les VLAN et IP reprennent ceux de l'architecture cible (docs/architecture.md).
+#
+# Déploiement :
+#   ludus templates list                 # vérifier les templates disponibles
+#   ludus range config set -f range-config-demo.yml
+#   ludus range deploy
+#   ludus range logs -f                  # suivre le déploiement
+#   ludus range status                   # IP des VM une fois déployées
+#
+# Si un template desktop est disponible, utilisez-le pour les clients :
+# la démo dans un navigateur est plus parlante.
+
+ludus:
+  - vm_name: "{{ range_id }}-MM01"
+    hostname: "{{ range_id }}-MM01"
+    template: debian-12-x64-server-template
+    vlan: 20
+    ip_last_octet: 10
+    ram_gb: 4
+    cpus: 2
+    linux: true
+
+  - vm_name: "{{ range_id }}-PC-CONS01"
+    hostname: "{{ range_id }}-PC-CONS01"
+    template: debian-12-x64-server-template
+    vlan: 30
+    ip_last_octet: 11
+    ram_gb: 2
+    cpus: 1
+    linux: true
+
+  - vm_name: "{{ range_id }}-PC-CONS02"
+    hostname: "{{ range_id }}-PC-CONS02"
+    template: debian-12-x64-server-template
+    vlan: 30
+    ip_last_octet: 12
+    ram_gb: 2
+    cpus: 1
+    linux: true
+
+network:
+  # Comme dans l'architecture cible : refus par défaut entre VLAN,
+  # puis ouverture explicite des seuls flux nécessaires.
+  inter_vlan_default: REJECT
+  rules:
+    - name: Postes utilisateurs vers Mattermost
+      vlan_src: 30
+      vlan_dst: 20
+      protocol: tcp
+      ports: 8065
+      action: ACCEPT
