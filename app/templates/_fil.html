@@ -1,0 +1,16 @@
+{# Fil de discussion. Variable `moi` = 'client' ou 'conseiller' #}
+<div class="fil">
+  {% for m in messages %}
+    <div class="bulle {{ 'moi' if m.auteur == moi else 'autre' }}">
+      <div class="texte">{{ m.contenu }}</div>
+      <div class="meta">{{ 'Vous' if m.auteur == moi else ('Conseiller' if m.auteur == 'conseiller' else 'Client') }} · {{ m.envoye_le.strftime('%d/%m %H:%M') }}</div>
+    </div>
+  {% else %}
+    <p class="discret">Aucun message pour le moment.</p>
+  {% endfor %}
+</div>
+<form method="post" class="saisie">
+  <input type="hidden" name="csrf" value="{{ csrf }}">
+  <textarea name="contenu" rows="3" maxlength="2000" placeholder="Votre message…" required></textarea>
+  <button class="bouton">Envoyer</button>
+</form>

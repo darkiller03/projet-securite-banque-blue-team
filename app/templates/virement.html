@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titre %}Virement{% endblock %}
+{% block contenu %}
+<div class="carte etroite">
+  <h1>Nouveau virement</h1>
+  <p class="discret">Depuis <span class="mono">{{ compte.numero | iban }}</span> — solde disponible : <strong>{{ compte.solde | euros }}</strong></p>
+  <form method="post">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <label>Compte du bénéficiaire <input name="numero_dest" class="mono" placeholder="FR76…" required value="{{ request.form.numero_dest }}"></label>
+    <label>Montant (€) <input name="montant" type="number" step="0.01" min="0.01" required value="{{ request.form.montant }}"></label>
+    <label>Libellé (facultatif) <input name="libelle" maxlength="140" value="{{ request.form.libelle }}"></label>
+    <button class="bouton plein">Valider le virement</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,102 @@
+:root {
+  --encre: #13233a;
+  --vert: #1f6f5c;
+  --vert-clair: #e5f1ed;
+  --fond: #f5f3ee;
+  --carte: #ffffff;
+  --gris: #6b7480;
+  --ligne: #e3e0d8;
+  --rouge: #b3412f;
+  --rayon: 10px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--encre); background: var(--fond);
+}
+a { color: var(--vert); }
+h1 { font-size: 1.6rem; margin: 0 0 .8rem; }
+h2 { font-size: 1.15rem; margin: 0 0 .8rem; }
+
+.barre {
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .6rem;
+  padding: .9rem 1.5rem; background: var(--encre); color: #fff;
+}
+.logo { color: #fff; text-decoration: none; font-weight: 700; letter-spacing: .2px; }
+.sillon { color: #7fc8b2; margin-right: .3rem; }
+.barre nav { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
+.barre nav a { color: #d8e2ec; text-decoration: none; font-size: .95rem; }
+.barre nav a:hover { color: #fff; }
+.barre nav a.sortir { opacity: .7; }
+
+main { flex: 1; width: 100%; max-width: 960px; margin: 0 auto; padding: 2rem 1.25rem; }
+footer { text-align: center; font-size: .8rem; color: var(--gris); padding: 1.2rem; }
+
+.carte {
+  background: var(--carte); border: 1px solid var(--ligne); border-radius: var(--rayon);
+  padding: 1.5rem; margin-bottom: 1.25rem;
+}
+.carte.etroite { max-width: 440px; margin: 1rem auto; }
+.grille { display: grid; grid-template-columns: 1.4fr 1fr; gap: 1.25rem; }
+.grille .carte { margin: 0 0 1.25rem; display: flex; flex-direction: column; gap: .5rem; align-items: flex-start; }
+
+.etiquette { font-size: .8rem; text-transform: uppercase; letter-spacing: .8px; color: var(--gris); }
+.solde { background: var(--encre); color: #fff; border: none; }
+.solde .etiquette, .solde .numero { color: #a9b8c8; }
+.solde .montant { font-size: 2.3rem; font-weight: 700; font-variant-numeric: tabular-nums; margin: .2rem 0 .6rem; }
+.solde .bouton { background: #7fc8b2; color: var(--encre); }
+.mono, .numero { font-family: ui-monospace, "SF Mono", Consolas, monospace; font-size: .9em; }
+
+form label { display: block; margin-bottom: .9rem; font-size: .9rem; font-weight: 600; }
+input, textarea {
+  display: block; width: 100%; margin-top: .3rem; padding: .65rem .75rem;
+  font: inherit; font-weight: 400; color: var(--encre);
+  border: 1px solid var(--ligne); border-radius: 8px; background: #fff;
+}
+input:focus, textarea:focus { outline: 2px solid var(--vert); outline-offset: -1px; border-color: transparent; }
+.ligne { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+
+.bouton {
+  display: inline-block; padding: .65rem 1.2rem; border: none; border-radius: 8px; cursor: pointer;
+  background: var(--vert); color: #fff; font: inherit; font-weight: 600; text-decoration: none;
+}
+.bouton:hover { filter: brightness(1.08); }
+.bouton.secondaire { background: var(--vert-clair); color: var(--vert); }
+.bouton.plein { width: 100%; margin-top: .4rem; }
+.bouton.petit { padding: .4rem .8rem; color: #fff !important; }
+
+.flash { padding: .75rem 1rem; border-radius: 8px; margin-bottom: 1rem; font-weight: 500; }
+.flash.ok { background: var(--vert-clair); color: var(--vert); }
+.flash.erreur { background: #f8e6e2; color: var(--rouge); }
+.discret { color: var(--gris); font-size: .9rem; }
+
+table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+th { text-align: left; font-weight: 600; color: var(--gris); font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; }
+th, td { padding: .6rem .4rem; border-bottom: 1px solid var(--ligne); }
+.droite { text-align: right; }
+.credit { color: var(--vert); font-weight: 600; font-variant-numeric: tabular-nums; }
+.debit { color: var(--rouge); font-weight: 600; font-variant-numeric: tabular-nums; }
+tr.nonlu td { font-weight: 600; }
+.pastille { background: var(--rouge); color: #fff; border-radius: 99px; padding: 0 .5rem; font-size: .75rem; margin-left: .3rem; }
+
+.hero { text-align: center; padding: 3.5rem 1rem; }
+.hero h1 { font-size: 2.2rem; max-width: 620px; margin: 0 auto 1rem; }
+.hero p { max-width: 520px; margin: 0 auto 1.5rem; color: var(--gris); }
+.actions { display: flex; gap: .8rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+
+.fil { display: flex; flex-direction: column; gap: .6rem; max-height: 55vh; overflow-y: auto; padding: 1rem 0; }
+.bulle { max-width: 75%; padding: .6rem .9rem; border-radius: 14px; }
+.bulle .texte { white-space: pre-wrap; word-wrap: break-word; }
+.bulle .meta { font-size: .72rem; opacity: .7; margin-top: .25rem; }
+.bulle.moi { align-self: flex-end; background: var(--vert); color: #fff; border-bottom-right-radius: 4px; }
+.bulle.autre { align-self: flex-start; background: #eef0f2; border-bottom-left-radius: 4px; }
+.saisie { display: flex; gap: .6rem; align-items: flex-end; border-top: 1px solid var(--ligne); padding-top: 1rem; }
+.saisie textarea { margin: 0; resize: vertical; }
+
+@media (max-width: 640px) {
+  .grille, .ligne { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 1.7rem; }
+  .bulle { max-width: 90%; }
+  table { font-size: .85rem; }
+}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titre %}{{ client.prenom }} {{ client.nom }}{% endblock %}
+{% block contenu %}
+<p><a href="{{ url_for('conseiller_messages') }}">← Tous les clients</a></p>
+<div class="carte">
+  <h1>{{ client.prenom }} {{ client.nom }}</h1>
+  <p class="discret">{{ client.email }}{% if compte %} · <span class="mono">{{ compte.numero | iban }}</span> · solde {{ compte.solde | euros }}{% endif %}</p>
+  {% set moi = 'conseiller' %}
+  {% include "_fil.html" %}
+</div>
+{% endblock %}

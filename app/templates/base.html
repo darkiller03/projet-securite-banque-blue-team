@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titre %}Banque Coopérative du Sillon{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="barre">
+    <a class="logo" href="{{ url_for('accueil') }}"><span class="sillon">≋</span> Banque Coopérative du Sillon</a>
+    <nav>
+      {% if session.role == 'client' %}
+        <a href="{{ url_for('mon_compte') }}">Mon compte</a>
+        <a href="{{ url_for('faire_virement') }}">Virement</a>
+        <a href="{{ url_for('contacter_conseiller') }}">Mon conseiller</a>
+        <a href="{{ url_for('deconnexion') }}" class="sortir">Déconnexion</a>
+      {% elif session.role == 'conseiller' %}
+        <a href="{{ url_for('conseiller_messages') }}">Messages clients</a>
+        <a href="{{ url_for('deconnexion') }}" class="sortir">Déconnexion</a>
+      {% else %}
+        <a href="{{ url_for('connexion') }}">Se connecter</a>
+        <a href="{{ url_for('inscription') }}" class="bouton petit">Ouvrir un compte</a>
+      {% endif %}
+    </nav>
+  </header>
+
+  <main>
+    {% for cat, msg in get_flashed_messages(with_categories=true) %}
+      <div class="flash {{ cat }}">{{ msg }}</div>
+    {% endfor %}
+    {% block contenu %}{% endblock %}
+  </main>
+
+  <footer>Banque fictive — projet sécurité INSA Centre Val de Loire. Aucune donnée réelle.</footer>
+</body>
+</html>

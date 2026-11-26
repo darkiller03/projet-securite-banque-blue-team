@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block titre %}Mon compte{% endblock %}
+{% block contenu %}
+<h1>Bonjour {{ g.client.prenom }}</h1>
+
+<div class="grille">
+  <div class="carte solde">
+    <span class="etiquette">Compte courant</span>
+    <span class="numero">{{ compte.numero | iban }}</span>
+    <span class="montant">{{ compte.solde | euros }}</span>
+    <a class="bouton" href="{{ url_for('faire_virement') }}">Faire un virement</a>
+  </div>
+  <div class="carte">
+    <span class="etiquette">Mon conseiller</span>
+    {% if non_lus %}
+      <p><strong>{{ non_lus }} nouveau{{ 'x' if non_lus > 1 }} message{{ 's' if non_lus > 1 }}</strong></p>
+    {% else %}
+      <p>Une question ? Écrivez à votre conseiller.</p>
+    {% endif %}
+    <a class="bouton secondaire" href="{{ url_for('contacter_conseiller') }}">Contacter mon conseiller</a>
+  </div>
+</div>
+
+<div class="carte">
+  <h2>Dernières opérations</h2>
+  {% if operations %}
+  <table>
+    <thead><tr><th>Date</th><th>Libellé</th><th>Compte</th><th class="droite">Montant</th></tr></thead>
+    <tbody>
+    {% for op in operations %}
+      <tr>
+        <td>{{ op.date_operation.strftime('%d/%m/%Y %H:%M') }}</td>
+        <td>{{ op.libelle }}</td>
+        <td class="mono">{{ op.autre_compte | iban }}</td>
+        <td class="droite {{ 'credit' if op.montant > 0 else 'debit' }}">{{ '+' if op.montant > 0 }}{{ op.montant | euros }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="discret">Aucune opération pour le moment.</p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titre %}Messages clients{% endblock %}
+{% block contenu %}
+<h1>Bonjour {{ g.conseiller.nom }}</h1>
+<div class="carte">
+  <h2>Mes clients</h2>
+  {% if clients %}
+  <table>
+    <thead><tr><th>Client</th><th>E-mail</th><th>Dernier message</th><th></th></tr></thead>
+    <tbody>
+    {% for c in clients %}
+      <tr class="{{ 'nonlu' if c.non_lus }}">
+        <td>{{ c.prenom }} {{ c.nom }} {% if c.non_lus %}<span class="pastille">{{ c.non_lus }}</span>{% endif %}</td>
+        <td>{{ c.email }}</td>
+        <td>{{ c.dernier.strftime('%d/%m %H:%M') if c.dernier else '—' }}</td>
+        <td class="droite"><a href="{{ url_for('conseiller_conversation', client_id=c.id) }}">Ouvrir</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+    <p class="discret">Aucun client rattaché.</p>
+  {% endif %}
+</div>
+{% endblock %}

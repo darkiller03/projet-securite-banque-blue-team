@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block titre %}Mon conseiller{% endblock %}
+{% block contenu %}
+<div class="carte">
+  <h1>Contacter mon conseiller</h1>
+  <p class="discret">Votre conseiller : <strong>{{ conseiller.nom if conseiller else 'non attribué' }}</strong></p>
+  {% set moi = 'client' %}
+  {% include "_fil.html" %}
+</div>
+{% endblock %}

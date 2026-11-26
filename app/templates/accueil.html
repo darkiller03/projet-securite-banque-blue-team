@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block contenu %}
+<section class="hero">
+  <h1>Votre banque de proximité, aussi en ligne.</h1>
+  <p>Consultez votre solde, faites vos virements et échangez avec votre conseiller, où que vous soyez.</p>
+  <div class="actions">
+    <a class="bouton" href="{{ url_for('inscription') }}">Ouvrir un compte</a>
+    <a class="bouton secondaire" href="{{ url_for('connexion') }}">J'ai déjà un compte</a>
+  </div>
+  <p class="discret"><a href="{{ url_for('conseiller_connexion') }}">Accès conseiller</a></p>
+</section>
+{% endblock %}

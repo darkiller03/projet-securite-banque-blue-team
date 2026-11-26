@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titre %}Ouvrir un compte{% endblock %}
+{% block contenu %}
+<div class="carte etroite">
+  <h1>Ouvrir un compte</h1>
+  <form method="post">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="ligne">
+      <label>Prénom <input name="prenom" required value="{{ request.form.prenom }}"></label>
+      <label>Nom <input name="nom" required value="{{ request.form.nom }}"></label>
+    </div>
+    <label>E-mail <input type="email" name="email" required value="{{ request.form.email }}"></label>
+    <label>Mot de passe <input type="password" name="mot_de_passe" minlength="8" required></label>
+    <label>Confirmation <input type="password" name="confirmation" minlength="8" required></label>
+    <button class="bouton plein">Créer mon compte</button>
+  </form>
+  <p class="discret">Déjà client ? <a href="{{ url_for('connexion') }}">Se connecter</a></p>
+</div>
+{% endblock %}
