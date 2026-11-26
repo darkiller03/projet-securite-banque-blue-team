@@ -99,10 +99,10 @@ fi
 echo "[6/7] Code de l'appli ($REPO_URL${BRANCH:+, branche $BRANCH})"
 if [[ -d "$APP_DIR/.git" ]]; then
   if [[ -n "$BRANCH" ]]; then
-    git -C "$APP_DIR" fetch -q origin "$BRANCH"
-    git -C "$APP_DIR" checkout -q -B "$BRANCH" "origin/$BRANCH"
+    git -c safe.directory="$APP_DIR" -C "$APP_DIR" fetch -q origin "$BRANCH"
+    git -c safe.directory="$APP_DIR" -C "$APP_DIR" checkout -q -B "$BRANCH" "origin/$BRANCH"
   else
-    git -C "$APP_DIR" pull -q --ff-only
+    git -c safe.directory="$APP_DIR" -C "$APP_DIR" pull -q --ff-only
   fi
 else
   git clone -q ${BRANCH:+--branch "$BRANCH"} "$REPO_URL" "$APP_DIR"
