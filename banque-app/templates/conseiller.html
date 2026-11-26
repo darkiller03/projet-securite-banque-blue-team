@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block contenu %}
+<h1>Messagerie conseiller</h1>
+<p>Clients vous ayant écrit :</p>
+{% if clients %}
+<ul class="liste-clients">
+  {% for c in clients %}
+    <li><a href="{{ url_for('conseiller_fil', client_id=c.id) }}">{{ c.nom }} <span>{{ c.email }}</span></a></li>
+  {% endfor %}
+</ul>
+{% else %}
+  <p>Aucun message pour le moment.</p>
+{% endif %}
+{% endblock %}

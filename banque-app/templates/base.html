@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Banque de Proximité du Centre</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header>
+    <a href="{{ url_for('accueil') }}" class="logo">BPC <span>Banque de Proximité du Centre</span></a>
+    <nav>
+      {% if user %}
+        {% if user.role == 'conseiller' %}
+          <a href="{{ url_for('espace_conseiller') }}">Messagerie</a>
+        {% else %}
+          <a href="{{ url_for('mon_compte') }}">Mon compte</a>
+          <a href="{{ url_for('virement') }}">Virement</a>
+          <a href="{{ url_for('messages') }}">Mon conseiller</a>
+        {% endif %}
+        <span class="user">{{ user.nom }}</span>
+        <a href="{{ url_for('deconnexion') }}" class="btn-ghost">Déconnexion</a>
+      {% else %}
+        <a href="{{ url_for('connexion') }}">Connexion</a>
+        <a href="{{ url_for('inscription') }}" class="btn">Ouvrir un compte</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}
+        <div class="flash {{ cat }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block contenu %}{% endblock %}
+  </main>
+  <footer>Projet sécurité INSA — démonstration, données fictives.</footer>
+</body>
+</html>

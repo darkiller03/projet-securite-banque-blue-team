@@ -54,6 +54,8 @@ Thumbs.db
 __pycache__/
 *.pyc
 .venv/
+venv/
+banque.db
 node_modules/
 
 # --- À ne pas ignorer ---

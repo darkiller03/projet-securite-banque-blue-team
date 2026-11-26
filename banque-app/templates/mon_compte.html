@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block contenu %}
+<h1>Bonjour {{ user.nom }}</h1>
+{% for compte in comptes %}
+  <div class="compte">
+    <div class="compte-num">Compte {{ compte.numero }}</div>
+    <div class="compte-solde">{{ "%.2f"|format(compte.solde|float) }} €</div>
+  </div>
+{% endfor %}
+<a href="{{ url_for('virement') }}" class="btn">Faire un virement</a>
+
+<h2>Dernières opérations</h2>
+{% if operations %}
+<table class="ops">
+  <tr><th>Date</th><th>De</th><th>Vers</th><th>Montant</th></tr>
+  {% for op in operations %}
+    <tr>
+      <td>{{ op.date_op }}</td>
+      <td>{{ op.compte_source }}</td>
+      <td>{{ op.compte_dest }}</td>
+      <td>{{ "%.2f"|format(op.montant|float) }} €</td>
+    </tr>
+  {% endfor %}
+</table>
+{% else %}
+  <p>Aucune opération pour le moment.</p>
+{% endif %}
+{% endblock %}

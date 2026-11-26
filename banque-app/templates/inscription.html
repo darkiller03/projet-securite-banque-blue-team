@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block contenu %}
+<section class="form-box">
+  <h1>Ouvrir un compte</h1>
+  <form method="post">
+    <label>Nom complet<input type="text" name="nom" required></label>
+    <label>Email<input type="email" name="email" required></label>
+    <label>Mot de passe<input type="password" name="mot_de_passe" required></label>
+    <button type="submit" class="btn btn-grand">Créer mon compte</button>
+  </form>
+  <p class="aide">Déjà client ? <a href="{{ url_for('connexion') }}">Se connecter</a></p>
+</section>
+{% endblock %}

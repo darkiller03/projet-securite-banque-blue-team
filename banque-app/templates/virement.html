@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block contenu %}
+<section class="form-box">
+  <h1>Faire un virement</h1>
+  <form method="post">
+    <label>Depuis mon compte
+      <select name="source" required>
+        {% for compte in comptes %}
+          <option value="{{ compte.numero }}">{{ compte.numero }} — {{ "%.2f"|format(compte.solde|float) }} €</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Vers le compte (numéro BPC du destinataire)
+      <input type="text" name="dest" placeholder="BPC..." required>
+    </label>
+    <label>Montant (€)<input type="number" name="montant" step="0.01" min="0.01" required></label>
+    <button type="submit" class="btn btn-grand">Valider le virement</button>
+  </form>
+</section>
+{% endblock %}

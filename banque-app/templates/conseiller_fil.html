@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block contenu %}
+<h1>Échange avec {{ client.nom }}</h1>
+<p class="aide"><a href="{{ url_for('espace_conseiller') }}">← Retour à la liste</a></p>
+<div class="chat">
+  {% for m in fils %}
+    <div class="bulle {{ 'moi' if m.auteur == 'conseiller' else 'autre' }}">
+      <div class="bulle-txt">{{ m.contenu }}</div>
+      <div class="bulle-date">{{ m.date_msg }}</div>
+    </div>
+  {% endfor %}
+</div>
+<form method="post" class="chat-form">
+  <input type="text" name="contenu" placeholder="Répondre au client..." required>
+  <button type="submit" class="btn">Envoyer</button>
+</form>
+{% endblock %}

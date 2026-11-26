@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block contenu %}
+<section class="hero">
+  <h1>Votre banque de proximité, en ligne</h1>
+  <p>Ouvrez un compte en une minute, suivez votre solde et faites vos virements.</p>
+  {% if not user %}
+    <a href="{{ url_for('inscription') }}" class="btn btn-grand">Ouvrir un compte</a>
+  {% else %}
+    <a href="{{ url_for('mon_compte') }}" class="btn btn-grand">Accéder à mon compte</a>
+  {% endif %}
+</section>
+<section class="cartes">
+  <div class="carte"><h3>Compte gratuit</h3><p>100 € offerts à l'ouverture pour la démonstration.</p></div>
+  <div class="carte"><h3>Virements</h3><p>Envoyez de l'argent vers un autre compte BPC.</p></div>
+  <div class="carte"><h3>Votre conseiller</h3><p>Écrivez-lui directement depuis votre espace.</p></div>
+</section>
+{% endblock %}
