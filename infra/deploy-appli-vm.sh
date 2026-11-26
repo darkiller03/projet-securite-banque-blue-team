@@ -16,6 +16,8 @@
 #   APP_SUBDIR  dossier de l'appli dans le dépôt (défaut : la racine)
 #   APP_MODULE  fichier:objet Flask pour gunicorn, défaut app:app
 #   APP_INIT    code Python lancé avant chaque démarrage (ex. création des tables), défaut : aucun
+#   DB_NAME     base PostgreSQL de l'appli, défaut banque (permet de garder une autre appli sur sa propre base)
+#   SCHEMA_FILE fichier SQL des tables (défaut : schema.sql du dossier de l'appli)
 #   PORT        port d'écoute, défaut 5000
 #   APP_DIR     dossier d'installation, défaut /opt/banque
 set -euo pipefail
@@ -34,7 +36,8 @@ PORT="${PORT:-5000}"
 APP_DIR="${APP_DIR:-/opt/banque}"
 WORK_DIR="$APP_DIR${APP_SUBDIR:+/$APP_SUBDIR}"
 APP_USER="banque"
-DB_NAME="banque"
+DB_NAME="${DB_NAME:-banque}"
+SCHEMA_FILE="${SCHEMA_FILE:-}"
 DB_USER="banque"
 ENV_FILE="/etc/banque.env"   # secrets de l'appli : jamais dans git
 
@@ -65,6 +68,8 @@ EOF
 fi
 # shellcheck disable=SC1090
 source "$ENV_FILE"
+# DATABASE_URL doit pointer vers la base demandée (DB_NAME)
+sed -i "s#^DATABASE_URL=.*#DATABASE_URL=postgresql://$DB_USER:$DB_PASSWORD@localhost:5432/$DB_NAME#" "$ENV_FILE"
 
 echo "[4/7] Base PostgreSQL \"$DB_NAME\" et utilisateur \"$DB_USER\""
 if ! runuser -u postgres -- psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='$DB_USER'" | grep -q 1; then
@@ -125,14 +130,15 @@ else
 fi
 runuser -u "$APP_USER" -- "$APP_DIR/venv/bin/pip" install -q gunicorn
 
-# Tables : appliquées une seule fois, seulement si le dépôt fournit schema.sql et que "clients" n'existe pas.
-if [[ -f "$WORK_DIR/schema.sql" ]]; then
+# Tables : appliquées une seule fois, seulement si "clients" n'existe pas encore dans la base.
+SCHEMA="${SCHEMA_FILE:-$WORK_DIR/schema.sql}"
+if [[ -f "$SCHEMA" ]]; then
   HAS_TABLE=$(PGPASSWORD="$DB_PASSWORD" psql -h localhost -U "$DB_USER" -d "$DB_NAME" -tAc "SELECT to_regclass('public.clients') IS NOT NULL")
   if [[ "$HAS_TABLE" == "f" ]]; then
-    PGPASSWORD="$DB_PASSWORD" psql -h localhost -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=1 -f "$WORK_DIR/schema.sql" >/dev/null
-    echo "  schema.sql appliqué"
+    PGPASSWORD="$DB_PASSWORD" psql -h localhost -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=1 -f "$SCHEMA" >/dev/null
+    echo "  schéma appliqué ($SCHEMA)"
   else
-    echo "  tables déjà présentes, schema.sql non rejoué"
+    echo "  tables déjà présentes, schéma non rejoué"
   fi
 fi
 
