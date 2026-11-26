@@ -25,7 +25,10 @@ from flask import (
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-a-changer")
+# Sans SECRET_KEY, une clé aléatoire est générée à chaque démarrage (les sessions
+# sont alors perdues au redémarrage). Une clé connue de tous permettrait de
+# fabriquer de faux cookies de session : ne jamais en mettre une en dur.
+app.secret_key = os.environ.get("SECRET_KEY") or secrets.token_hex(32)
 
 # --- Choix de la base : PostgreSQL (prod sur la VM) ou SQLite (test local) ---
 DATABASE_URL = os.environ.get("DATABASE_URL")  # ex: postgresql://user:pass@10.x.x.x/banque
@@ -52,19 +55,36 @@ if USE_POSTGRES:
             db.commit()
         cur.close()
         return result
+
+    def execute(sql, params=()):
+        """Exécute sans valider la transaction ; renvoie le nombre de lignes touchées."""
+        cur = get_db().cursor()
+        cur.execute(sql.replace("?", "%s"), params)
+        n = cur.rowcount
+        cur.close()
+        return n
 else:
     import sqlite3
 
+    SQLITE_PATH = os.environ.get("SQLITE_PATH", "banque.db")
+
     def get_db():
         if "db" not in g:
-            g.db = sqlite3.connect("banque.db")
+            g.db = sqlite3.connect(SQLITE_PATH)
             g.db.row_factory = sqlite3.Row
         return g.db
 
+    def _sqlite_params(params):
+        # SQLite ne connaît pas le type Decimal : on convertit en float.
+        return tuple(float(p) if isinstance(p, Decimal) else p for p in params)
+
+    def execute(sql, params=()):
+        """Exécute sans valider la transaction ; renvoie le nombre de lignes touchées."""
+        return get_db().execute(sql, _sqlite_params(params)).rowcount
+
     def query(sql, params=(), one=False, commit=False):
         db = get_db()
-        # SQLite ne connaît pas le type Decimal : on convertit en float.
-        params = tuple(float(p) if isinstance(p, Decimal) else p for p in params)
+        params = _sqlite_params(params)
         cur = db.execute(sql, params)
         result = None
         if not commit:
@@ -138,6 +158,55 @@ def nouveau_numero():
     return "BPC" + secrets.token_hex(4).upper()
 
 
+CENTIME = Decimal("0.01")
+
+
+def lire_montant(texte):
+    """Convertit la saisie en Decimal. Renvoie None si ce n'est pas un nombre fini."""
+    try:
+        montant = Decimal(texte.strip().replace(",", "."))
+    except InvalidOperation:
+        return None
+    return montant if montant.is_finite() else None
+
+
+def a_plus_de_deux_decimales(montant):
+    try:
+        return montant != montant.quantize(CENTIME)
+    except InvalidOperation:  # nombre démesuré
+        return True
+
+
+def faire_virement(client_id, source, dest, montant):
+    """Débit + crédit + historique dans UNE transaction.
+
+    Le débit n'a lieu que si le solde suffit, vérifié dans la même requête
+    UPDATE : deux virements simultanés ne peuvent pas rendre le solde négatif.
+    Renvoie True si le virement est passé, False si le solde est insuffisant.
+    """
+    db = get_db()
+    try:
+        debite = execute(
+            "UPDATE comptes SET solde = ROUND(solde - ?, 2) "
+            "WHERE numero = ? AND client_id = ? AND solde >= ?",
+            (montant, source, client_id, montant),
+        )
+        if debite != 1:
+            db.rollback()
+            return False
+        execute("UPDATE comptes SET solde = ROUND(solde + ?, 2) WHERE numero = ?", (montant, dest))
+        execute(
+            "INSERT INTO operations (compte_source, compte_dest, montant, date_op, libelle) "
+            "VALUES (?, ?, ?, ?, ?)",
+            (source, dest, montant, datetime.now().strftime("%Y-%m-%d %H:%M"), "Virement"),
+        )
+        db.commit()
+        return True
+    except Exception:
+        db.rollback()
+        raise
+
+
 # --- Authentification ---
 def utilisateur_courant():
     uid = session.get("uid")
@@ -188,6 +257,7 @@ def connexion():
         mdp = request.form.get("mot_de_passe", "")
         client = query("SELECT * FROM clients WHERE email = ?", (email,), one=True)
         if client and check_password_hash(client["mot_de_passe"], mdp):
+            session.clear()  # repart d'une session neuve à chaque connexion
             session["uid"] = client["id"]
             return redirect(url_for("espace_conseiller") if client["role"] == "conseiller"
                             else url_for("mon_compte"))
@@ -217,7 +287,8 @@ def mon_compte():
                 ORDER BY id DESC""",
             numeros + numeros,
         )
-    return render_template("mon_compte.html", user=user, comptes=comptes, operations=operations)
+    return render_template("mon_compte.html", user=user, comptes=comptes,
+                           operations=operations, mes_numeros=numeros)
 
 
 @app.route("/virement", methods=["GET", "POST"])
@@ -229,10 +300,7 @@ def virement():
     if request.method == "POST":
         source = request.form.get("source", "")
         dest = request.form.get("dest", "").strip()
-        try:
-            montant = Decimal(request.form.get("montant", "0"))
-        except InvalidOperation:
-            montant = Decimal("0")
+        montant = lire_montant(request.form.get("montant", ""))
 
         compte_src = query("SELECT * FROM comptes WHERE numero = ? AND client_id = ?",
                            (source, user["id"]), one=True)
@@ -242,22 +310,20 @@ def virement():
             flash("Compte source invalide.", "erreur")
         elif not compte_dst:
             flash("Le compte destinataire n'existe pas.", "erreur")
+        elif source == dest:
+            flash("Impossible de faire un virement vers le même compte.", "erreur")
+        elif montant is None:
+            flash("Montant invalide.", "erreur")
         elif montant <= 0:
             flash("Le montant doit être positif.", "erreur")
-        elif Decimal(str(compte_src["solde"])) < montant:
+        elif a_plus_de_deux_decimales(montant):
+            flash("Le montant ne peut pas dépasser les centimes (2 décimales).", "erreur")
+        elif not faire_virement(user["id"], source, dest, montant):
             flash("Solde insuffisant.", "erreur")
         else:
-            # Débit / crédit
-            query("UPDATE comptes SET solde = solde - ? WHERE numero = ?", (montant, source), commit=True)
-            query("UPDATE comptes SET solde = solde + ? WHERE numero = ?", (montant, dest), commit=True)
-            query(
-                "INSERT INTO operations (compte_source, compte_dest, montant, date_op, libelle) "
-                "VALUES (?, ?, ?, ?, ?)",
-                (source, dest, montant, datetime.now().strftime("%Y-%m-%d %H:%M"), "Virement"),
-                commit=True,
-            )
-            flash(f"Virement de {montant} € effectué vers {dest}.", "ok")
+            flash(f"Virement de {montant:.2f} € effectué vers {dest}.", "ok")
             return redirect(url_for("mon_compte"))
+        comptes = query("SELECT * FROM comptes WHERE client_id = ?", (user["id"],))
     return render_template("virement.html", user=user, comptes=comptes)
 
 
@@ -317,5 +383,7 @@ def conseiller_fil(client_id):
 if __name__ == "__main__":
     with app.app_context():
         init_db()
-    # host=0.0.0.0 pour que la VM soit joignable depuis le réseau
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    # host=0.0.0.0 pour que la VM soit joignable depuis le réseau.
+    # Le mode debug (console Python dans le navigateur en cas d'erreur) n'est
+    # activé que sur demande : FLASK_DEBUG=1, et jamais sur la VM de démo.
+    app.run(host="0.0.0.0", port=5000, debug=os.environ.get("FLASK_DEBUG") == "1")

@@ -18,7 +18,11 @@
       <td>{{ op.date_op }}</td>
       <td>{{ op.compte_source }}</td>
       <td>{{ op.compte_dest }}</td>
-      <td>{{ "%.2f"|format(op.montant|float) }} €</td>
+      {% if op.compte_source in mes_numeros %}
+        <td class="debit">-{{ "%.2f"|format(op.montant|float) }} €</td>
+      {% else %}
+        <td class="credit">+{{ "%.2f"|format(op.montant|float) }} €</td>
+      {% endif %}
     </tr>
   {% endfor %}
 </table>
