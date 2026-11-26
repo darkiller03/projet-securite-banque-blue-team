@@ -32,6 +32,7 @@ openaev/raw/
 openaev/*-raw.json
 *.dump
 *.sql
+!app/schema.sql
 
 # --- Sauvegardes, images disque, captures volumineuses ---
 *.qcow2

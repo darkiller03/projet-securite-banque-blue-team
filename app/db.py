@@ -44,6 +44,6 @@ def execute(sql, params=(), returning=False):
 
 def init_db():
     """Crée les tables (idempotent)."""
-    schema = (Path(__file__).parent / "schema.sql").read_text()
+    schema = (Path(__file__).parent / "schema.sql").read_text(encoding="utf-8")
     with psycopg2.connect(DATABASE_URL) as conn, conn.cursor() as cur:
         cur.execute(schema)
