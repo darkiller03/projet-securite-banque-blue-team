@@ -112,7 +112,13 @@ chown -R "$APP_USER":"$APP_USER" "$APP_DIR"
 
 runuser -u "$APP_USER" -- python3 -m venv "$APP_DIR/venv"
 if [[ -f "$WORK_DIR/requirements.txt" ]]; then
-  runuser -u "$APP_USER" -- "$APP_DIR/venv/bin/pip" install -q -r "$WORK_DIR/requirements.txt"
+  # psycopg2-binary < 2.9.10 n'a pas de version précompilée pour Python 3.13 (Debian 13) :
+  # on relâche cette seule contrainte pour l'installation, sans toucher au fichier du dépôt.
+  REQ_TMP=$(mktemp /tmp/requirements.XXXXXX)
+  sed -E 's/^psycopg2(-binary)?[=<>~]=?[0-9.]+.*/psycopg2-binary>=2.9.10/I' "$WORK_DIR/requirements.txt" >"$REQ_TMP"
+  chmod 644 "$REQ_TMP"
+  runuser -u "$APP_USER" -- "$APP_DIR/venv/bin/pip" install -q -r "$REQ_TMP"
+  rm -f "$REQ_TMP"
 else
   echo "  pas de requirements.txt : installation de flask et psycopg2-binary par défaut"
   runuser -u "$APP_USER" -- "$APP_DIR/venv/bin/pip" install -q flask psycopg2-binary
